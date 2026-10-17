@@ -1,0 +1,193 @@
+{
+  "expected": {
+    "source": "independent synthetic Python serializer; no physical ROS robot or bridge process",
+    "protocol": "foxglove.websocket.v1",
+    "binary_header_bytes": 13,
+    "pointcloud": {
+      "height": 2,
+      "width": 3,
+      "point_step": 24,
+      "row_step": 80,
+      "data_bytes": 160,
+      "finite_points": 5,
+      "finite_lidar_xyz": [
+        [
+          -1.0,
+          0.0,
+          0
+        ],
+        [
+          0.0,
+          1.0,
+          1
+        ],
+        [
+          1.0,
+          0.0,
+          2
+        ],
+        [
+          -1.0,
+          2.0,
+          -1
+        ],
+        [
+          0.0,
+          3.0,
+          0
+        ]
+      ],
+      "finite_map_xyz_tick_0": [
+        [
+          2.0,
+          0.5,
+          0.25
+        ],
+        [
+          1.0,
+          1.5,
+          1.25
+        ],
+        [
+          2.0,
+          2.5,
+          2.25
+        ],
+        [
+          0.0,
+          0.5,
+          -0.75
+        ],
+        [
+          -1.0,
+          1.5,
+          0.25
+        ]
+      ],
+      "rgb_uint32": [
+        16769621,
+        6809849,
+        16347926,
+        3718648,
+        10980346
+      ]
+    },
+    "tf_tick_0": {
+      "map_to_base_link": {
+        "translation": [
+          2,
+          1,
+          0
+        ],
+        "yaw_rad": 1.5707963267948966
+      },
+      "base_link_to_lidar": {
+        "translation": [
+          0.5,
+          0,
+          0.25
+        ],
+        "yaw_rad": 0
+      }
+    },
+    "occupancy": {
+      "width": 16,
+      "height": 16,
+      "resolution": 0.5,
+      "origin": [
+        -2,
+        -2,
+        0
+      ]
+    },
+    "path_poses": 15,
+    "marker_ids_added": [
+      7,
+      8
+    ],
+    "marker_ids_after_delete_7": [
+      8
+    ],
+    "marker_ids_after_deleteall": [],
+    "image": {
+      "width": 320,
+      "height": 180,
+      "format": "jpeg",
+      "label": "SYNTHETIC QA / NO ROBOT CAMERA"
+    }
+  },
+  "channels": [
+    {
+      "id": 1,
+      "topic": "/tf",
+      "encoding": "ros1",
+      "schemaName": "tf2_msgs/TFMessage",
+      "schema": "geometry_msgs/TransformStamped[] transforms\n================================================================================\nMSG: geometry_msgs/TransformStamped\nstd_msgs/Header header\nstring child_frame_id\ngeometry_msgs/Transform transform\n================================================================================\nMSG: std_msgs/Header\nuint32 seq\ntime stamp\nstring frame_id\n================================================================================\nMSG: geometry_msgs/Transform\ngeometry_msgs/Vector3 translation\ngeometry_msgs/Quaternion rotation\n================================================================================\nMSG: geometry_msgs/Vector3\nfloat64 x\nfloat64 y\nfloat64 z\n================================================================================\nMSG: geometry_msgs/Quaternion\nfloat64 x\nfloat64 y\nfloat64 z\nfloat64 w",
+      "schemaEncoding": "ros1msg",
+      "payloadBase64": "AQAAAAAAAADoAwAAAAAAAAMAAABtYXAJAAAAYmFzZV9saW5rAAAAAAAAAEAAAAAAAADwPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMw7f2aeoOY/zTt/Zp6g5j8="
+    },
+    {
+      "id": 2,
+      "topic": "/tf_static",
+      "encoding": "ros1",
+      "schemaName": "tf2_msgs/TFMessage",
+      "schema": "geometry_msgs/TransformStamped[] transforms\n================================================================================\nMSG: geometry_msgs/TransformStamped\nstd_msgs/Header header\nstring child_frame_id\ngeometry_msgs/Transform transform\n================================================================================\nMSG: std_msgs/Header\nuint32 seq\ntime stamp\nstring frame_id\n================================================================================\nMSG: geometry_msgs/Transform\ngeometry_msgs/Vector3 translation\ngeometry_msgs/Quaternion rotation\n================================================================================\nMSG: geometry_msgs/Vector3\nfloat64 x\nfloat64 y\nfloat64 z\n================================================================================\nMSG: geometry_msgs/Quaternion\nfloat64 x\nfloat64 y\nfloat64 z\nfloat64 w",
+      "schemaEncoding": "ros1msg",
+      "payloadBase64": "AQAAAAAAAADoAwAAAAAAAAkAAABiYXNlX2xpbmsFAAAAbGlkYXIAAAAAAADgPwAAAAAAAAAAAAAAAAAA0D8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwPw=="
+    },
+    {
+      "id": 3,
+      "topic": "/qa/points_mixed",
+      "encoding": "ros1",
+      "schemaName": "sensor_msgs/PointCloud2",
+      "schema": "std_msgs/Header header\nuint32 height\nuint32 width\nsensor_msgs/PointField[] fields\nbool is_bigendian\nuint32 point_step\nuint32 row_step\nuint8[] data\nbool is_dense\n================================================================================\nMSG: std_msgs/Header\nuint32 seq\ntime stamp\nstring frame_id\n================================================================================\nMSG: sensor_msgs/PointField\nuint8 INT8=1\nuint8 UINT8=2\nuint8 INT16=3\nuint8 UINT16=4\nuint8 INT32=5\nuint8 UINT32=6\nuint8 FLOAT32=7\nuint8 FLOAT64=8\nstring name\nuint32 offset\nuint8 datatype\nuint32 count",
+      "schemaEncoding": "ros1msg",
+      "payloadBase64": "AAAAAOgDAAAAAAAABQAAAGxpZGFyAgAAAAMAAAAFAAAAAQAAAHkAAAAACAEAAAABAAAAeAgAAAAHAQAAAAEAAAB6DAAAAAMBAAAACQAAAGludGVuc2l0eQ4AAAAEAQAAAAMAAAByZ2IQAAAABgEAAAAAGAAAAFAAAACgAAAAAAAAAAAAAAAAAIC/AABkAFXi/wCqu8zdAAAAAAAA8D8AAAAAAQDIAPnoZwCqu8zdAAAAAAAAAAAAAIA/AgAsARZz+QCqu8zdUk9XUEFEISEAAAAAAAAAQAAAgL///5AB+L04AKq7zN0AAAAAAAAIQAAAAAAAAPQB+ounAKq7zN0AAAAAAADwPwAAwH8BAFgC////AKq7zN1ST1dQQUQhIQA="
+    },
+    {
+      "id": 4,
+      "topic": "/qa/map",
+      "encoding": "ros1",
+      "schemaName": "nav_msgs/OccupancyGrid",
+      "schema": "std_msgs/Header header\nnav_msgs/MapMetaData info\nint8[] data\n================================================================================\nMSG: std_msgs/Header\nuint32 seq\ntime stamp\nstring frame_id\n================================================================================\nMSG: nav_msgs/MapMetaData\ntime map_load_time\nfloat32 resolution\nuint32 width\nuint32 height\ngeometry_msgs/Pose origin\n================================================================================\nMSG: geometry_msgs/Pose\ngeometry_msgs/Point position\ngeometry_msgs/Quaternion orientation\n================================================================================\nMSG: geometry_msgs/Point\nfloat64 x\nfloat64 y\nfloat64 z\n================================================================================\nMSG: geometry_msgs/Quaternion\nfloat64 x\nfloat64 y\nfloat64 z\nfloat64 w",
+      "schemaEncoding": "ros1msg",
+      "payloadBase64": "AAAAAOgDAAAAAAAAAwAAAG1hcOgDAAAAAAAAAAAAPxAAAAAQAAAAAAAAAAAAAMAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAQAAZGRkZGRkZGRkZGRkZGRkZGQAAAAAAAAAAAAAAAAAAGRkAAAAAAAAAAAAAAAAAABkZAAAAAAAAAAAAAAAAAAAZGQAAAAAZGQAAAAAAAAAAGRkAAAAAGRkAAAAAAAAAABkZAAAAABkZAAAAAAAAAAAZGQAAAAAZGQAAAAAAAAAAGRkAAAAAGRkAAAAAAAAAABkZAAAAABkZAAAAAAAAAAAZGQAAAAAZGQAAAAAAAAAAGRkAAAAAGRkAAAAAP////9kZAAAAAAAAAAAAAD/////ZGQAAAAAAAAAAAAA/////2RkAAAAAAAAAAAAAP////9kZGRkZGRkZGRkZGRkZGRkZA=="
+    },
+    {
+      "id": 5,
+      "topic": "/qa/path",
+      "encoding": "ros1",
+      "schemaName": "nav_msgs/Path",
+      "schema": "std_msgs/Header header\ngeometry_msgs/PoseStamped[] poses\n================================================================================\nMSG: std_msgs/Header\nuint32 seq\ntime stamp\nstring frame_id\n================================================================================\nMSG: geometry_msgs/PoseStamped\nstd_msgs/Header header\ngeometry_msgs/Pose pose\n================================================================================\nMSG: geometry_msgs/Pose\ngeometry_msgs/Point position\ngeometry_msgs/Quaternion orientation\n================================================================================\nMSG: geometry_msgs/Point\nfloat64 x\nfloat64 y\nfloat64 z\n================================================================================\nMSG: geometry_msgs/Quaternion\nfloat64 x\nfloat64 y\nfloat64 z\nfloat64 w",
+      "schemaEncoding": "ros1msg",
+      "payloadBase64": "AAAAAOgDAAAAAAAAAwAAAG1hcA8AAAAAAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAA8L8AAAAAAAAAQHsUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAA4L/tbCVdhx0DQHsUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAAAACz/68wJb0FQHsUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAA4D9xlYbo0HQHQHsUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAA8D+xEPhxIP8HQHsUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAA+D8SbbS6PUYHQHsUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAAAEBm9HA9WWcFQHsUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAABEC4vGtEDq4CQHsUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAACECWvjBG5hD/P3sUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAADECEywOvb+v4P3sUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAAEECp8BERI+TzP3sUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAAEkCIa13nPMbwP3sUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAAFEAA4fmytQ/wP3sUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAAFkCU7aKmXt3xP3sUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAA6AMAAAAAAAADAAAAbWFwAAAAAAAAGEAmhTT0VOb1P3sUrkfheqQ/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8="
+    },
+    {
+      "id": 6,
+      "topic": "/qa/markers",
+      "encoding": "ros1",
+      "schemaName": "visualization_msgs/MarkerArray",
+      "schema": "visualization_msgs/Marker[] markers\n================================================================================\nMSG: visualization_msgs/Marker\nuint8 ARROW=0\nuint8 CUBE=1\nuint8 SPHERE=2\nuint8 CYLINDER=3\nuint8 LINE_STRIP=4\nuint8 LINE_LIST=5\nuint8 CUBE_LIST=6\nuint8 SPHERE_LIST=7\nuint8 POINTS=8\nuint8 TEXT_VIEW_FACING=9\nuint8 MESH_RESOURCE=10\nuint8 TRIANGLE_LIST=11\nuint8 ADD=0\nuint8 MODIFY=0\nuint8 DELETE=2\nuint8 DELETEALL=3\nstd_msgs/Header header\nstring ns\nint32 id\nint32 type\nint32 action\ngeometry_msgs/Pose pose\ngeometry_msgs/Vector3 scale\nstd_msgs/ColorRGBA color\nduration lifetime\nbool frame_locked\ngeometry_msgs/Point[] points\nstd_msgs/ColorRGBA[] colors\nstring text\nstring mesh_resource\nbool mesh_use_embedded_materials\n================================================================================\nMSG: std_msgs/Header\nuint32 seq\ntime stamp\nstring frame_id\n================================================================================\nMSG: geometry_msgs/Pose\ngeometry_msgs/Point position\ngeometry_msgs/Quaternion orientation\n================================================================================\nMSG: geometry_msgs/Point\nfloat64 x\nfloat64 y\nfloat64 z\n================================================================================\nMSG: geometry_msgs/Quaternion\nfloat64 x\nfloat64 y\nfloat64 z\nfloat64 w\n================================================================================\nMSG: geometry_msgs/Vector3\nfloat64 x\nfloat64 y\nfloat64 z\n================================================================================\nMSG: std_msgs/ColorRGBA\nfloat32 r\nfloat32 g\nfloat32 b\nfloat32 a",
+      "schemaEncoding": "ros1msg",
+      "payloadBase64": "AgAAAAAAAADoAwAAAAAAAAMAAABtYXAMAAAAU1lOVEhFVElDX1FBBwAAAAEAAAAAAAAAAAAAAAAACEAAAAAAAAAIQAAAAAAAAOA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D9mZmZmZmbmP2ZmZmZmZuY/AAAAAAAA8D8AAIA/ZmbmPpqZGT4AAIA/AAAAAAAAAAAAAAAAAAAAAAAMAAAAU1lOVEhFVElDIFFBAAAAAAAAAAAA6AMAAAAAAAADAAAAbWFwDAAAAFNZTlRIRVRJQ19RQQgAAAACAAAAAAAAAAAAAAAAAPA/AAAAAAAACEAAAAAAAADgPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPA/ZmZmZmZm5j9mZmZmZmbmPwAAAAAAAPA/AACAP2Zm5j6amRk+AACAPwAAAAAAAAAAAAAAAAAAAAAADAAAAFNZTlRIRVRJQyBRQQAAAAAA"
+    },
+    {
+      "id": 7,
+      "topic": "/qa/camera/compressed",
+      "encoding": "ros1",
+      "schemaName": "sensor_msgs/CompressedImage",
+      "schema": "std_msgs/Header header\nstring format\nuint8[] data\n================================================================================\nMSG: std_msgs/Header\nuint32 seq\ntime stamp\nstring frame_id",
+      "schemaEncoding": "ros1msg",
+      "payloadBase64": "AAAAAOgDAAAAAAAABQAAAGxpZGFyBAAAAGpwZWe6FQAA/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAC0AUADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDxaiirNjp9zqMrx2yKSib3Z5FjRFyBlmYgAZIHJ6kDvXUZFaitRvDmrJcQwG0PmTXBtowHUgyYU4znAGGUgngg5BwDSz+HNWtp7eGa02vcWZvosSKQ0IQyFsg4+6pOOvtyKVwMqituHwnq9zFayQpZyLdzCCALfwEySfL8oG/OfnTI7bhmqVhpF9qmz7HB5u+5itF+dVzLLu2LyR12Nz0GOSKLgUaK17fwzqN1fxWVu1hLcTELGiajbncScAA78ZJPTrSf8I3qhaEJFDIsrSIskV1E6ZjVWfLhiqgK6kkkDn2NFwMmir8ujahFqEFibffcThTCInWQSAnAKspIIyCMg9j6U+fQdRt5LZDFHL9pk8qJreeOZWfj5dyMQDyOCc8igDNoq5Lpd5Dqx0t4cXglEPlh1ILk4GGBwR75x70v9kXx0T+2Bbk6f9oNt5wYcSBQ2MZz0I5xjmmBSorZXwprJnmgNtGksVw9sUkuI0LyocMiAsN5B4+XPUeoqvYaHf6jFPLAkKpBIkUjT3EcIDvu2r87DJOxuB6UrgZ1Fa7eF9YSN2e0COodjC8yLMQhIYiMneQNrcgdj6Gnf8IprLRxslqkpdIpBHFcRvIFlClCyKxZQdy8kD7w9aLoDGorVk8O6jE8Qf7IElLBZRewmLK4ypkD7Q3I4JzzSz+G9UttVbTJIoDdpv8AMRLqJxHszu3srEJjBzuIxii4GTRWmvh/U31WDTUt1e5uF3QhZkKOvPzBwduODznAwfSopNH1CLSTqj2xWyFybQyFhxKF3FSM56HrjFAFGitubwlrNtcXcFzBBbyWjRLP593DGFMqF0GWYAkqCcDOMc4qH/hG9T+wreCKBomieZQt1EXaNGZWcIG3FQUbkDGFJ6c0XQGVRVu90y80+K1luoTGl1EJoTuB3Ieh4PH0ODgg9CKqUwCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK2PDt4lndXJa9htfMgKf6RB50MvzKSkigMccZBAOGC9Oox6KAOu/t6xs38RRWEixwXNpGLZQrFfPyiSGPdkqux7gDdg7SB1xWhD4l0mY3EN1ckJBpASzk8tj+/bTxbyRdOAW289P3fXBzXA0UrBc6nQdXsbL/hF/tE+z7Drb3dx8jHZEfs2G4HP+rfgZPHuKt+H/EelW32PzrW107ytbsLt/IEz7oo/N3sdzP8Ad3LwME7u/bi6KLBc6izutM0/xhoV8sunJa295DLObFbkqirICSRKNxOM/dz0p+k6tp6+Ff7IuLryJbh7tWkKMRCG+ysjHAJIJgZTjJAJOOmeUoosFzoLK8sNK1q0xfS3VutrLbzTorbYzKsikxqwBwokBwQMsD61q6XdaR4f0hm/tWz1G4F0LpIo451CvHFIsY+ZVPLSZJBGAg5ya4qiiwXOlu9Usrq7TVYvKhuBpvltbpvwko/cqFLEk4Ta+cnkHvUmkazYw6BZ6VdzEQT3N0l4oQny45Et/Lk6clXiLYHPyY788tRRYLnb+IdQ0bxFrTXQ1dLSK3u7nBaGQtNE9xJKrx4X7xEhGG29F564rR+JdOddcubvT4Lg3+rwXi2k3mACMfaC2ChXkeYo5P8AF0OOORoosFzvL/WdKufGcXiY6yJjaujNA0MgkuGiAVSPl2hZNoY5Kkbm445u23ibw/aRyyO9s0l1pNvYNLbLcC4jbyI4nLhsRlVwxAXqVQ+9ebUUuUdzcu5LOx8PSaZb38V9LcXaXDPCjqkaorqB86qST5hzxj5Rye1+51bT7vxX4of7V5dnqzzrDdFGwgM4lRiAN2DsAPGQGPHauUop2Fc6W0vtN0YzSR3K6lNHZ+REsglWIu7nfsxtYKELDnBLMT0rof8AhJdAnh8q5nXybi8l1GaERPtSUraybBx3ZJ4wecbsnjmvOaKLBc72fXdK1ODURdXNjLLcDTHH25LkKzRWrxykGIZyHbHPBySM1Wg1rSRZ2Fgz20UiaXc2ragqTFoWeadgoHQqyOBnaTiQ8gjji6KLBc6jxDrlhrOnyxRQRWzWt3/oip5hMsBTYSxYkAqIohgYHJwK5eiigAooopgFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRXsngb/kTrD/tp/wCjGrfD0fbS5b2OTGYr6tTU7X1seN0V9C0V1/2d/e/D/gnm/wBtf3Px/wCAfPVFfQtFH9nf3vw/4If21/c/H/gHz1RX0LRR/Z3978P+CH9tf3Px/wCAfPVFfQtFH9nf3vw/4If21/c/H/gHz1RX0LRR/Z3978P+CH9tf3Px/wCAfPVFfQtZ2v8A/Iuap/16S/8AoBpSy+yvzfh/wSoZzzSUeTfz/wCAeF0UV9I189j8f9U5fdve/W21vI+pwWC+tc3vWtbpfc+bqK+kaK8/+3f+nf4/8A7/AOxf7/4f8E+bqK+kaKP7d/6d/j/wA/sX+/8Ah/wT5uor6Roo/t3/AKd/j/wA/sX+/wDh/wAE+bqK+kaKP7d/6d/j/wAAP7F/v/h/wT5uor6Roo/t3/p3+P8AwA/sX+/+H/BPm6iu2+KP/IzW3/Xmv/ob1e+Fn/MW/wC2P/s9e9gX9ajF7c3zPIrUfZ1XTvsed0V9E0V6n9n/AN78P+CL2fmfO1FfRNFH9n/3vw/4Iez8z52or6Joo/s/+9+H/BD2fmfO1FfRNFH9n/3vw/4Iez8z52or6Joo/s/+9+H/AAQ9n5nztRXvHiD/AJFvVP8Ar0l/9ANeD1y4ih7FpXuRKPKFeyeBv+ROsP8Atp/6MavG69k8Df8AInWH/bT/ANGNWuA/iP0/yPHzj+AvX9GdDRRRXrnzYUUUUAFFFFABRRRQAUUUUAFZ2v8A/Iuap/16S/8AoBrRrO1//kXNU/69Jf8A0A1M/hZpS/iR9UeF19I183V9I1+e57/y7+f6H6nkv2/l+oUUUV8+e4FFFFABRRRQAUUUUAFFFFAHknxR/wCRmtv+vNf/AEN6vfCz/mLf9sf/AGeqPxR/5Ga2/wCvNf8A0N6vfCz/AJi3/bH/ANnr73JPgpen+Z8ni/8Aepep6LRRRX0xmFFFFABRRRQAUUUUAFFFFAGd4g/5FvVP+vSX/wBANeD17x4g/wCRb1T/AK9Jf/QDXg9eXmHxIyqbhXsngb/kTrD/ALaf+jGrxuvZPA3/ACJ1h/20/wDRjVOA/iP0/wAjxc4/gL1/RnQ0UUV6582FFFFABRRRQAUUUUAFFFFABWdr/wDyLmqf9ekv/oBrRrO1/wD5FzVP+vSX/wBANTP4WaUv4kfVHhdfSNfN1fSNfnue/wDLv5/ofqeS/b+X6hRRRXz57gUUUUAFFFFABRRRQAUUUUAeSfFH/kZrb/rzX/0N6vfCz/mLf9sf/Z6o/FH/AJGa2/681/8AQ3q98LP+Yt/2x/8AZ6+9yT4KXp/mfJ4v/epep6LRRRX0xmFFFFABRRRQAUUUUAFFFFAGd4g/5FvVP+vSX/0A14PXvHiD/kW9U/69Jf8A0A14PXl5h8SMqm4V7J4G/wCROsP+2n/oxq8br2TwN/yJ1h/20/8ARjVOA/iP0/yPFzj+AvX9GdDRRRXrnzYUUUUAFFFFABRRRQAUUUUAFZ2v/wDIuap/16S/+gGtGs7X/wDkXNU/69Jf/QDUz+FmlL+JH1R4XX0jXzdX0jX57nv/AC7+f6H6nkv2/l+oUUUV8+e4FFFFABRRRQAUUUUAFFFFAHknxR/5Ga2/681/9Der3ws/5i3/AGx/9nqj8Uf+Rmtv+vNf/Q3q98LP+Yt/2x/9nr73JPgpen+Z8ni/96l6notFFFfTGYUUUUAFFFFABRRRQAUUUUAZ3iD/AJFvVP8Ar0l/9ANeD17x4g/5FvVP+vSX/wBANeD15eYfEjKpuFeyeBv+ROsP+2n/AKMavG69k8Df8idYf9tP/RjVOA/iP0/yPFzj+AvX9GdDRRRXrnzYUUUUAFFFFABRRRQAUUUUAFZ2v/8AIuap/wBekv8A6Aa0aztf/wCRc1T/AK9Jf/QDUz+FmlL+JH1R4XX0jXzdX0jX57nv/Lv5/ofqeS/b+X6hRRRXz57gUUUUAFFFFABRRRQAUUUUAeSfFH/kZrb/AK81/wDQ3q98LP8AmLf9sf8A2eqPxR/5Ga2/681/9Der3ws/5i3/AGx/9nr73JPgpen+Z8ni/wDepep6LRRRX0xmFFFFABRRRQAUUUUAFFFFAGd4g/5FvVP+vSX/ANANeD17x4g/5FvVP+vSX/0A14PXl5h8SMqm4V7J4G/5E6w/7af+jGrxuvZPA3/InWH/AG0/9GNU4D+I/T/I8XOP4C9f0Z0NFFFeufNhRRRQAUUUUAFFFFABRRRQAVna/wD8i5qn/XpL/wCgGtGs7X/+Rc1T/r0l/wDQDUz+FmlL+JH1R4XX0jXzdX0jX57nv/Lv5/ofqeS/b+X6hRRRXz57gUUUUAFFFFABRRRQAUUUUAeSfFH/AJGa2/681/8AQ3q98LP+Yt/2x/8AZ6o/FH/kZrb/AK81/wDQ3q98LP8AmLf9sf8A2evvck+Cl6f5nyeL/wB6l6notFFFfTGYUUUUAFFFFABRRRQAUUUUAZ3iD/kW9U/69Jf/AEA14PXvHiD/AJFvVP8Ar0l/9ANeD15eYfEjKpuFeyeBv+ROsP8Atp/6MavG69k8Df8AInWH/bT/ANGNU4D+I/T/ACPFzj+AvX9GdDRRRXrnzYUUUUAFFFFABRRRQAUUUUAFZ2v/APIuap/16S/+gGtGs7X/APkXNU/69Jf/AEA1M/hZpS/iR9UeF19I183V9I1+e57/AMu/n+h+p5L9v5fqFFFFfPnuBRRRQAUUUUAFFFFABRRRQB5J8Uf+Rmtv+vNf/Q3q98LP+Yt/2x/9nqj8Uf8AkZrb/rzX/wBDer3ws/5i3/bH/wBnr73JPgpen+Z8ni/96l6notFFFfTGYUUUUAFFFFABRRRQAUUUUAZ3iD/kW9U/69Jf/QDXg9e8eIP+Rb1T/r0l/wDQDXg9eXmHxIyqbhXsngb/AJE6w/7af+jGrxuvZPA3/InWH/bT/wBGNU4D+I/T/I8XOP4C9f0Z0NFFFeufNhRRRQAUUUUAFFFFABRRRQAVna//AMi5qn/XpL/6Aa0aztf/AORc1T/r0l/9ANTP4WaUv4kfVHhdfSNfN1fSNfnue/8ALv5/ofqeS/b+X6hRRRXz57gUUUUAFFFFABRRRQAUUUUAeSfFH/kZrb/rzX/0N6vfCz/mLf8AbH/2eqPxR/5Ga2/681/9Der3ws/5i3/bH/2evvck+Cl6f5nyeL/3qXqei0UUV9MZhRRRQAUUUUAFFFFABRRRQBneIP8AkW9U/wCvSX/0A14PXvHiD/kW9U/69Jf/AEA14PXl5h8SMqm4Vcg1fU7WFYbfUbuGJc7UjnZVHfgA1TorhTa2MZRUtGjR/t/Wf+gtf/8AgS/+NH9v6z/0Fr//AMCX/wAazqKfPLuT7Kn/ACr7jR/t/Wf+gtf/APgS/wDjR/b+s/8AQWv/APwJf/Gs6ijnl3D2VP8AlX3Gj/b+s/8AQWv/APwJf/Gj+39Z/wCgtf8A/gS/+NZ1FHPLuHsqf8q+40f7f1n/AKC1/wD+BL/40f2/rP8A0Fr/AP8AAl/8azqKOeXcPZU/5V9xo/2/rP8A0Fr/AP8AAl/8aP7f1n/oLX//AIEv/jWdRRzy7h7Kn/KvuNH+39Z/6C1//wCBL/402TW9WljaOTVL143BVla4chgeoIzVCijnl3D2UOyCtL/hItb/AOgxqH/gS/8AjWbRWcoRl8SuaxnKOzsaX/CRa3/0GNQ/8CX/AMaP+Ei1v/oMah/4Ev8A41m0VPsaf8q+4r2tT+Z/eaX/AAkWt/8AQY1D/wACX/xo/wCEi1v/AKDGof8AgS/+NZtFHsaf8q+4Pa1P5n95pf8ACRa3/wBBjUP/AAJf/Gj/AISLW/8AoMah/wCBL/41m0Uexp/yr7g9rU/mf3ml/wAJFrf/AEGNQ/8AAl/8aP8AhItb/wCgxqH/AIEv/jWbRR7Gn/KvuD2tT+Z/eaX/AAkWt/8AQY1D/wACX/xo/wCEi1v/AKDGof8AgS/+NZtFHsaf8q+4Pa1P5n95PdXt1fSiW7uZriQLtDzSFyB6ZPbk0611C9sd/wBjvLi3343eTIU3Y6ZweepqtRWkfd+HQhtt3Zo/8JBrX/QXv/8AwJf/ABo/4SDWv+gvf/8AgS/+NZ1FVzy7hdmj/wAJBrX/AEF7/wD8CX/xo/4SDWv+gvf/APgS/wDjWdRRzy7hdmj/AMJBrX/QXv8A/wACX/xo/wCEg1r/AKC9/wD+BL/41nUUc8u4XZo/8JBrX/QXv/8AwJf/ABo/4SDWv+gvf/8AgS/+NZ1FHPLuF2aP/CQa1/0F7/8A8CX/AMaP+Eg1r/oL3/8A4Ev/AI1nUUc8u4XZfk1zVpo3jk1S9eNwVZWuHIYHqCM9KoUUUm29wCiiikAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf//Z"
+    },
+    {
+      "id": 8,
+      "topic": "/qa/points_bigendian",
+      "encoding": "ros1",
+      "schemaName": "sensor_msgs/PointCloud2",
+      "schema": "std_msgs/Header header\nuint32 height\nuint32 width\nsensor_msgs/PointField[] fields\nbool is_bigendian\nuint32 point_step\nuint32 row_step\nuint8[] data\nbool is_dense\n================================================================================\nMSG: std_msgs/Header\nuint32 seq\ntime stamp\nstring frame_id\n================================================================================\nMSG: sensor_msgs/PointField\nuint8 INT8=1\nuint8 UINT8=2\nuint8 INT16=3\nuint8 UINT16=4\nuint8 INT32=5\nuint8 UINT32=6\nuint8 FLOAT32=7\nuint8 FLOAT64=8\nstring name\nuint32 offset\nuint8 datatype\nuint32 count",
+      "schemaEncoding": "ros1msg",
+      "payloadBase64": "AAAAAOgDAAAAAAAABQAAAGxpZGFyAgAAAAMAAAAFAAAAAQAAAHkAAAAACAEAAAABAAAAeAgAAAAHAQAAAAEAAAB6DAAAAAMBAAAACQAAAGludGVuc2l0eQ4AAAAEAQAAAAMAAAByZ2IQAAAABgEAAAABGAAAAFAAAACgAAAAAAAAAAAAAAC/gAAAAAAAZAD/4lWqu8zdP/AAAAAAAAAAAAAAAAEAyABn6Pmqu8zdAAAAAAAAAAA/gAAAAAIBLAD5cxaqu8zdUk9XUEFEISFAAAAAAAAAAL+AAAD//wGQADi9+Kq7zN1ACAAAAAAAAAAAAAAAAAH0AKeL+qq7zN0/8AAAAAAAAH/AAAAAAQJYAP///6q7zN1ST1dQQUQhIQA="
+    }
+  ]
+}

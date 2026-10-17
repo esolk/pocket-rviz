@@ -1,0 +1,25 @@
+# Dependencies and generated output
+**/node_modules/
+web/dist/
+.toolchains/
+.local/
+android/build/
+qa/artifacts/
+**/__pycache__/
+**/.vite/
+**/.pytest_cache/
+delivery/
+*.log
+*.apk
+*.aab
+# Local credentials and signing material
+.env
+.env.*
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+local.properties
+.DS_Store

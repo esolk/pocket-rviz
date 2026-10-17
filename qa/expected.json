@@ -1,0 +1,117 @@
+{
+  "source": "independent synthetic Python serializer; no physical ROS robot or bridge process",
+  "protocol": "foxglove.websocket.v1",
+  "binary_header_bytes": 13,
+  "pointcloud": {
+    "height": 2,
+    "width": 3,
+    "point_step": 24,
+    "row_step": 80,
+    "data_bytes": 160,
+    "finite_points": 5,
+    "finite_lidar_xyz": [
+      [
+        -1.0,
+        0.0,
+        0
+      ],
+      [
+        0.0,
+        1.0,
+        1
+      ],
+      [
+        1.0,
+        0.0,
+        2
+      ],
+      [
+        -1.0,
+        2.0,
+        -1
+      ],
+      [
+        0.0,
+        3.0,
+        0
+      ]
+    ],
+    "finite_map_xyz_tick_0": [
+      [
+        2.0,
+        0.5,
+        0.25
+      ],
+      [
+        1.0,
+        1.5,
+        1.25
+      ],
+      [
+        2.0,
+        2.5,
+        2.25
+      ],
+      [
+        0.0,
+        0.5,
+        -0.75
+      ],
+      [
+        -1.0,
+        1.5,
+        0.25
+      ]
+    ],
+    "rgb_uint32": [
+      16769621,
+      6809849,
+      16347926,
+      3718648,
+      10980346
+    ]
+  },
+  "tf_tick_0": {
+    "map_to_base_link": {
+      "translation": [
+        2,
+        1,
+        0
+      ],
+      "yaw_rad": 1.5707963267948966
+    },
+    "base_link_to_lidar": {
+      "translation": [
+        0.5,
+        0,
+        0.25
+      ],
+      "yaw_rad": 0
+    }
+  },
+  "occupancy": {
+    "width": 16,
+    "height": 16,
+    "resolution": 0.5,
+    "origin": [
+      -2,
+      -2,
+      0
+    ]
+  },
+  "path_poses": 15,
+  "marker_ids_added": [
+    7,
+    8
+  ],
+  "marker_ids_after_delete_7": [
+    8
+  ],
+  "marker_ids_after_deleteall": [],
+  "image": {
+    "width": 320,
+    "height": 180,
+    "format": "jpeg",
+    "label": "SYNTHETIC QA / NO ROBOT CAMERA"
+  }
+}

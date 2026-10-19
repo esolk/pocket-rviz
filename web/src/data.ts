@@ -1,8 +1,9 @@
-import { Matrix4, Quaternion, Vector3 } from 'three';
+import { Color, Matrix4, Quaternion, Vector3 } from 'three';
+import { normalizeLayerSettings, type ColorMode, type LayerSettings } from './display-settings';
 
 export type Vec3 = { x: number; y: number; z: number };
 export type Quat = Vec3 & { w: number };
-export type Cloud = { positions: Float32Array; colors?: Float32Array; count: number };
+export type Cloud = { positions: Float32Array; colors?: Float32Array; count: number; colorMode?: ColorMode; warning?: string; solidIndices?: Uint32Array };
 
 const NS = 1_000_000_000n;
 const FLOAT32_MAX = 3.4028234663852886e38;
@@ -270,10 +271,14 @@ function safeCoordinate(value: number): boolean { return Number.isFinite(value) 
 
 // Intensity units are device-specific: normalize the retained finite samples per message.
 // Clouds without packed color/intensity use a relative height color ramp. Alpha is ignored.
-function scalarColors(values: Float64Array, count: number, colors: Float32Array, grayscale: boolean): void {
+function scalarColors(values: Float64Array, count: number, colors: Float32Array, grayscale: boolean, invalidColor?: Color): void {
   let min = Infinity, max = -Infinity;
   for (let i = 0; i < count; i++) if (Number.isFinite(values[i])) { min = Math.min(min, values[i]); max = Math.max(max, values[i]); }
   for (let i = 0; i < count; i++) {
+    if (!Number.isFinite(values[i]) && invalidColor) {
+      invalidColor.toArray(colors, i * 3);
+      continue;
+    }
     const span = max - min;
     // Scaling before subtraction preserves a FLOAT64 range that exceeds MAX_VALUE.
     let t = Number.isFinite(values[i]) && max > min
@@ -288,10 +293,14 @@ function scalarColors(values: Float64Array, count: number, colors: Float32Array,
 
 /**
  * PointCloud2: field offsets/counts, all eight numeric datatypes, row padding and
- * byte order follow sensor_msgs. Only each named field's first component is used.
+ * byte order follow sensor_msgs. Coordinate fields use their first component;
+ * packed RGB requires exactly one INT32, UINT32 or FLOAT32 value. Explicit color
+ * modes fall back to the configured solid color when their source is unavailable.
  * Regular index decimation bounds rendering cost; it is not voxel-grid filtering.
  */
-export function decodePointCloud(msg: any, maxPoints = 60_000): Cloud {
+export function decodePointCloud(msg: any, maxPoints = 60_000, settings?: Partial<LayerSettings>): Cloud {
+  const display = normalizeLayerSettings(settings, 'sensor_msgs/PointCloud2');
+  const solid = new Color(display.color);
   const width = uint(msg?.width, 'cloud width');
   const height = uint(msg?.height, 'cloud height');
   const budget = pointBudget(maxPoints);
@@ -304,24 +313,41 @@ export function decodePointCloud(msg: any, maxPoints = 60_000): Cloud {
   const fields = new Map<string, Field>();
   if (!Array.isArray(msg.fields)) throw new Error('PointCloud2 fields are missing');
   for (const field of msg.fields) {
-    const datatype = uint(field?.datatype, 'field datatype', true);
-    const offset = uint(field?.offset, 'field offset');
-    const count = uint(field?.count ?? 1, 'field count', true);
-    const size = FIELD_SIZES[datatype];
-    if (!size || offset + size * count > pointStep) throw new Error(`Invalid PointCloud2 field ${String(field?.name)}`);
-    if (typeof field.name === 'string' && !fields.has(field.name)) fields.set(field.name, { datatype, offset, count });
+    try {
+      const datatype = uint(field?.datatype, 'field datatype', true);
+      const offset = uint(field?.offset, 'field offset');
+      const count = uint(field?.count ?? 1, 'field count', true);
+      const size = FIELD_SIZES[datatype];
+      if (!size || offset + size * count > pointStep) throw new Error(`Invalid PointCloud2 field ${String(field?.name)}`);
+      if (typeof field.name === 'string' && !fields.has(field.name)) fields.set(field.name, { datatype, offset, count });
+    } catch (error) {
+      // Bad optional color metadata must not reject otherwise valid XYZ geometry.
+      if (!['rgb', 'rgba', 'intensity'].includes(field?.name)) throw error;
+    }
   }
   const x = fields.get('x'), y = fields.get('y'), z = fields.get('z');
   if (!x || !y || !z) throw new Error('PointCloud2 requires x, y and z fields');
-  const colorField = fields.get('rgb') ?? fields.get('rgba');
-  const packed = colorField && [5, 6, 7].includes(colorField.datatype) ? colorField : undefined;
-  const intensity = fields.get('intensity');
+  const packed = [fields.get('rgb'), fields.get('rgba')].find((field) =>
+    field && [5, 6, 7].includes(field.datatype) && field.count === 1);
+  const intensityField = fields.get('intensity');
+  const intensity = intensityField?.count === 1 ? intensityField : undefined;
+  let mode: ColorMode = display.colorMode === 'auto'
+    ? packed ? 'rgb' : intensity ? 'intensity' : 'height'
+    : display.colorMode;
+  let warning: string | undefined;
+  if (mode === 'rgb' && !packed) {
+    mode = 'solid';
+    warning = 'RGB 字段缺失或无效，使用纯色';
+  } else if (mode === 'intensity' && !intensity) {
+    mode = 'solid';
+    warning = 'intensity 字段缺失或无效，使用纯色';
+  }
   const total = width * height;
   const stride = Math.max(1, Math.ceil(total / budget));
   const capacity = Math.ceil(total / stride);
   const positions = new Float32Array(capacity * 3);
   const colors = new Float32Array(capacity * 3);
-  const scalars = packed ? undefined : new Float64Array(capacity);
+  const scalars = mode === 'intensity' || mode === 'height' ? new Float64Array(capacity) : undefined;
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const little = !msg.is_bigendian;
   let count = 0;
@@ -333,19 +359,36 @@ export function decodePointCloud(msg: any, maxPoints = 60_000): Cloud {
     if (![px, py, pz].every(safeCoordinate)) continue;
     const k = count * 3;
     positions[k] = px; positions[k + 1] = py; positions[k + 2] = pz;
-    if (packed) {
+    if (mode === 'rgb' && packed) {
       // FLOAT32 rgb is bit-cast, never numerically converted (its value may be NaN).
       const rgb = view.getUint32(offset + packed.offset, little);
       colors[k] = ((rgb >>> 16) & 255) / 255;
       colors[k + 1] = ((rgb >>> 8) & 255) / 255;
       colors[k + 2] = (rgb & 255) / 255;
     } else if (scalars) {
-      scalars[count] = intensity ? readField(view, offset + intensity.offset, intensity.datatype, little) : pz;
-    }
+      scalars[count] = mode === 'intensity' && intensity ? readField(view, offset + intensity.offset, intensity.datatype, little) : pz;
+    } else solid.toArray(colors, k);
     count++;
   }
-  if (scalars) scalarColors(scalars, count, colors, !!intensity);
-  return { positions: positions.slice(0, count * 3), colors: colors.slice(0, count * 3), count };
+  let solidIndices: Uint32Array | undefined;
+  if (scalars) {
+    let finiteCount = 0;
+    for (let i = 0; i < count; i++) if (Number.isFinite(scalars[i])) finiteCount++;
+    if (mode === 'intensity' && count && !finiteCount) {
+      mode = 'solid';
+      warning = 'intensity 没有有限值，使用纯色';
+      for (let i = 0; i < count; i++) solid.toArray(colors, i * 3);
+    } else {
+      scalarColors(scalars, count, colors, mode === 'intensity', solid);
+      if (finiteCount < count) {
+        warning = '部分 intensity 非有限值，已使用纯色';
+        solidIndices = new Uint32Array(count - finiteCount);
+        let fallback = 0;
+        for (let i = 0; i < count; i++) if (!Number.isFinite(scalars[i])) solidIndices[fallback++] = i;
+      }
+    }
+  }
+  return { positions: positions.slice(0, count * 3), colors: colors.slice(0, count * 3), count, colorMode: mode, warning, solidIndices };
 }
 
 /** A planar XY scan. Uses one header-time transform; individual rays are not motion-deskewed. */

@@ -3,7 +3,7 @@
 ROS Tablet Viewer is a small offline WebView host for the web application in `../web`.
 
 - Application ID: `dev.dot.rosviewer`
-- Version: `0.1.1` (version code 2)
+- Version: `0.2.0` (version code 3)
 - Minimum: Android 7.0 / API 24; compile/target API 35
 - Requires an updated Android System WebView with WebGL 2 and a suitable GPU
 - Layout target: 7-inch phone in landscape; portrait and larger tablet layouts remain supported
@@ -25,11 +25,11 @@ cd ..
 bash scripts/android-build.sh
 ```
 
-For an existing SDK, set `ANDROID_SDK_ROOT` or `ANDROID_HOME`. Build output is `android/build/ros-tablet-viewer-0.1.1-debug.apk`; its checksum, manifest/signature reports, and `build-metadata.json` are adjacent. The metadata lists SHA-256 hashes for each bundled web file so the packaged bundle can be compared with browser QA. Web assets are copied from `web/dist`, or the directory specified by `WEB_DIST`. The build never edits web sources. ZIP entry timestamps are normalized; repeating the build with identical web files, SDK tools, Java compiler and debug key should produce identical APK bytes.
+For an existing SDK, set `ANDROID_SDK_ROOT` or `ANDROID_HOME`. Build output is `android/build/ros-tablet-viewer-0.2.0-debug.apk`; its checksum, manifest/signature reports, and `build-metadata.json` are adjacent. The metadata lists SHA-256 hashes for each bundled web file so the packaged bundle can be compared with browser QA. Web assets are copied from `web/dist`, or the directory specified by `WEB_DIST`. The build never edits web sources. ZIP entry timestamps are normalized; repeating the build with identical web files, SDK tools, Java compiler and debug key should produce identical APK bytes.
 
 The build creates an ordinary local debug keystore at `.local/android-debug.keystore` if absent. This is not a production signing identity; do not use this build for Play Store publication. The key is deliberately excluded from the source delivery. Rebuilding with a different key may require uninstalling the earlier APK (which removes its saved preferences) before installation. Keep the same local key for your own future test updates.
 
-To install yourself, transfer the APK to the tablet and open it, or use `adb install -r android/build/ros-tablet-viewer-0.1.1-debug.apk` after enabling authorized USB debugging. No device is installed or modified by the build script.
+To install yourself, transfer the APK to the tablet and open it, or use `adb install -r android/build/ros-tablet-viewer-0.2.0-debug.apk` after enabling authorized USB debugging. No device is installed or modified by the build script. `adb install -r` only works when the installed APK has the same signing certificate. The separately delivered October 2026 v0.2.0 test build uses a new debug certificate because the prior private key was unavailable: it cannot overwrite the previous v0.1.1 build. Uninstalling that previous build first removes its local preferences; record any connection address you need before doing so.
 
 ## Network and WebView security
 

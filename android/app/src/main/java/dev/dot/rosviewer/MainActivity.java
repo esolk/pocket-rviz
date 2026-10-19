@@ -392,7 +392,12 @@ public final class MainActivity extends Activity {
 
     private Map<String, Object> deviceMetadata() {
         Map<String, Object> device = new LinkedHashMap<>();
-        device.put("appVersion", "0.1.1 (2)");
+        try {
+            PackageInfo app = getPackageManager().getPackageInfo(getPackageName(), 0);
+            device.put("appVersion", app.versionName + " (" + app.versionCode + ")");
+        } catch (android.content.pm.PackageManager.NameNotFoundException missing) {
+            device.put("appVersion", "unknown");
+        }
         device.put("androidVersion", Build.VERSION.RELEASE);
         device.put("androidApi", Build.VERSION.SDK_INT);
         device.put("manufacturer", Build.MANUFACTURER);

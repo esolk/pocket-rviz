@@ -29,6 +29,10 @@ npm run dev
 
 For Android, follow the [build guide](android/README.md). Android 7.0/API 24 is the minimum, but a WebGL 2-capable GPU and modern Android System WebView are also required. The build uses JDK 17/21, Android SDK 35, and build-tools 35.0.0 without Gradle.
 
+## Install a missing bridge from Android
+
+The native installer supports Ubuntu 20.04 / Noetic on amd64 and arm64. It verifies SSH host identity, accepts one-time password or private-key authentication, downloads authenticated APT package plans through the phone, transfers all packages by SFTP, then separately confirms installation and read-only startup. See [installer flow and limits](docs/BRIDGE_INSTALLER.zh-CN.md). It does not bypass missing trusted package indexes or change firewall/source configuration.
+
 ## Connect to ROS1
 
 Run a secured ROS1 Foxglove bridge and enter its ws:// or wss:// address in the app. Port 8765 is the usual default; rosbridge JSON on port 9090 is not supported. The initial address ws://192.0.2.1:8765 is a documentation placeholder and must be replaced. No connection starts automatically.
@@ -45,4 +49,4 @@ This repository publishes source, tests, and documentation only. SDKs, dependenc
 
 ## License
 
-A project-level license has not yet been selected. Public visibility alone is not a grant to reuse, modify, or redistribute the project. Third-party dependencies retain their own licenses and copyright notices in [THIRD_PARTY_NOTICES.txt](web/public/THIRD_PARTY_NOTICES.txt).
+Project-owned code is licensed under the [MIT License](LICENSE). Third-party dependencies retain their own licenses and copyright notices in [THIRD_PARTY_NOTICES.txt](web/public/THIRD_PARTY_NOTICES.txt).

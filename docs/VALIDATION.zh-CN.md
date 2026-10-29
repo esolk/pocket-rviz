@@ -30,3 +30,21 @@
 本仓库不附带旧版 APK、签名私钥、SDK、依赖目录或内部调试日志。源码中的连接示例使用文档保留地址 `192.0.2.1`，需要换成自己的目标地址。构建产物保留在本地交付路径；实际 APK 清单和各资源 SHA-256 可通过构建报告对照当前 `web/dist`。
 
 后续设备验证请使用 [验收清单](ACCEPTANCE.zh-CN.md)，记录实际设备、软件版本、数据负载与观察结果。
+
+
+## 2026-10-29：MIT 与手机内 SSH bridge 安装器（0.3.0）
+
+本次变更基于 v0.2.0 的 topic/display 分支。项目自有代码采用 MIT，现有 JavaScript 依赖许可证保留；新增 JSch/Bouncy Castle 原始许可随 APK 附带。没有复制 RViz C++ 或 Qt 源码，也不将第三方代码重新标为 MIT。
+
+已完成的源代码/合成验证：
+- Web 179 项测试、TypeScript 检查、Vite production build。
+- 原生网络诊断 41 项 Java 和 14 项 JS 消息边界测试。
+- 安装器 20 项命令/输入边界、17 项包清单验证。
+- 17 项隔离目标脚本测试：系统/架构、缺 ROS、APT 信任覆盖与全局绕过拒绝、SHA256/缺包拒绝、已装检测、安装步骤和无 ROS master 拒绝启动。
+- 4 项本机 socket 测试：有效只读 Foxglove 握手、错误 protocol、错误 accept 和可写 capabilities 拒绝。
+- 临时加密 OpenSSH Ed25519/RSA3072/ECDSA256 私钥导入与签名可用性测试，无真实账号或外部 SSH 请求。
+- 独立静态审阅修复了取消时连接创建竞态、APT trusted=true/on/1 绕过，以及手机移动网络下载后返回 Wi-Fi 的计划/缓存保留问题。
+
+APK 构建检查包括 v2/v3 签名、zipalign、ZIP/DEX、清单与 Internet-only 权限、Web 与原生安装脚本/许可资产逐字节比对；另运行 Android API/权限 lint。最终制品哈希及构建报告随交付记录，以最终文件为准。
+
+未执行：物理 Android UI/触摸/系统切网、实际 Ubuntu20.04 Noetic/Jetson 端到端安装、真实 SSH/MFA/sudo 配置、真实 ROS master/传感器流、性能/温度/续航。安全审阅与合成测试不替代这些设备验收。官方 DEB 仓库在当前研究网络部分请求失败，未宣称真实包已下载成功。调试签名密钥与此前交付不保证一致，可能必须卸载旧版并丢失本地偏好；先记录连接地址和显示设置。

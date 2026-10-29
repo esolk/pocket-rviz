@@ -61,4 +61,8 @@ SDK、node_modules、调试签名私钥和中间构建目录不随源码交付�
 
 ## 许可证与第三方依赖
 
-项目自身尚未选定开源许可证；公开可见不等于授予重新使用、修改或分发许可。第三方依赖各自的许可证不受影响，完整声明见 [THIRD_PARTY_NOTICES.txt](web/public/THIRD_PARTY_NOTICES.txt)。
+项目自有代码采用 [MIT 许可证](LICENSE)。第三方依赖各自的许可证不受影响，完整声明见 [THIRD_PARTY_NOTICES.txt](web/public/THIRD_PARTY_NOTICES.txt)。
+
+## 手机代装 bridge
+
+新增原生 SSH 安装向导：一次性密码或私钥登录 → 检测系统/架构和 bridge → 手机下载主包与缺失依赖 → SFTP 传输 → sudo 安装 → 确认启动只读 bridge。支持 Ubuntu 20.04 / Noetic 的 amd64、arm64。见[完整流程、凭据处理与限制](docs/BRIDGE_INSTALLER.zh-CN.md)。

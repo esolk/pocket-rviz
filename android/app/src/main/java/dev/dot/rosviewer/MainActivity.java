@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -62,6 +63,7 @@ public final class MainActivity extends Activity {
     private int pageGeneration;
     private boolean foreground;
     private boolean pageReady;
+    private String pendingBridgeEndpoint;
     private String diagnosticRequestId;
     private static final Pattern NETWORK_ERROR = Pattern.compile("(?:net::)?ERR_[A-Z0-9_]{1,70}");
 
@@ -137,12 +139,37 @@ public final class MainActivity extends Activity {
             }
         });
         webView.setWebViewClient(new BundledContentClient());
-        frame.addView(webView, new FrameLayout.LayoutParams(
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.addView(webView, new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+        Button setupBridge = new Button(this);
+        setupBridge.setText("未安装 bridge？连接主机安装");
+        setupBridge.setOnClickListener(v -> startActivityForResult(new Intent(this, BridgeInstallerActivity.class), 72));
+        content.addView(setupBridge, new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, (int)(48 * getResources().getDisplayMetrics().density)));
+        frame.addView(content, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         setContentView(frame);
         frame.requestApplyInsets();
         webView.loadUrl(HOME);
         enterImmersiveMode();
+    }
+
+    @Override protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request,result,data);
+        if(request!=72 || result!=RESULT_OK || data==null)return;
+        try {pendingBridgeEndpoint=DiagnosticEndpoint.parse(data.getStringExtra("bridge_endpoint")).target;}
+        catch(IllegalArgumentException ignored){pendingBridgeEndpoint=null;}
+        connectInstalledBridge();
+    }
+    private void connectInstalledBridge() {
+        if(pendingBridgeEndpoint==null || !isDiagnosticPage())return;
+        final String endpoint=pendingBridgeEndpoint;pendingBridgeEndpoint=null;
+        webView.evaluateJavascript("(function(){var input=document.getElementById('url');"
+            +"var button=document.getElementById('connect')||document.getElementById('gpu-connect');"
+            +"if(!input||!button)return false;input.value="+JSONObject.quote(endpoint)+";"
+            +"input.dispatchEvent(new Event('input',{bubbles:true}));button.click();return true;})()",null);
     }
 
     private void enterImmersiveMode() {
@@ -195,6 +222,7 @@ public final class MainActivity extends Activity {
         if (webView != null) webView.onResume();
         lifecycle("resume");
         if (pageReady) installDiagnosticBridge();
+        connectInstalledBridge();
     }
 
     @Override protected void onDestroy() {
@@ -224,6 +252,7 @@ public final class MainActivity extends Activity {
         @Override public void onPageFinished(WebView view, String url) {
             pageReady = HOME.equals(url) && HOME.equals(view.getUrl());
             if (pageReady && foreground) installDiagnosticBridge();
+            connectInstalledBridge();
         }
 
         @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
@@ -392,7 +421,12 @@ public final class MainActivity extends Activity {
 
     private Map<String, Object> deviceMetadata() {
         Map<String, Object> device = new LinkedHashMap<>();
-        device.put("appVersion", "0.1.1 (2)");
+        try {
+            PackageInfo app = getPackageManager().getPackageInfo(getPackageName(), 0);
+            device.put("appVersion", app.versionName + " (" + app.versionCode + ")");
+        } catch (android.content.pm.PackageManager.NameNotFoundException missing) {
+            device.put("appVersion", "unknown");
+        }
         device.put("androidVersion", Build.VERSION.RELEASE);
         device.put("androidApi", Build.VERSION.SDK_INT);
         device.put("manufacturer", Build.MANUFACTURER);

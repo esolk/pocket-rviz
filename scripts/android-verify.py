@@ -28,9 +28,15 @@ with zipfile.ZipFile(apk) as archive:
             count += 1
     bootstrap = root / 'android/app/src/main/assets/diagnostics-bootstrap.js'
     assert archive.read('assets/diagnostics-bootstrap.js') == bootstrap.read_bytes(), 'Native bridge bootstrap mismatch'
+    for source in sorted((root / 'android/app/src/main/assets').rglob('*')):
+        if source.is_file():
+            entry = 'assets/' + source.relative_to(root / 'android/app/src/main/assets').as_posix()
+            assert archive.read(entry) == source.read_bytes(), f'Native asset mismatch: {entry}'
     dex = archive.read('classes.dex')
     assert dex.startswith(b'dex\n'), 'Invalid DEX header'
     assert b'Ldev/dot/rosviewer/MainActivity;' in dex, 'MainActivity is missing from DEX'
+    all_dex = b''.join(archive.read(n) for n in names if re.fullmatch(r'classes[0-9]*\.dex', n))
+    assert b'Ldev/dot/rosviewer/BridgeInstallerActivity;' in all_dex, 'Installer Activity missing from DEX'
 manifest = ET.parse(root / 'android/app/src/main/AndroidManifest.xml').getroot()
 ns = '{http://schemas.android.com/apk/res/android}'
 badging = (apk.parent / 'manifest-report.txt').read_text()

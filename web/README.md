@@ -34,8 +34,8 @@ ROS schema 由 `@foxglove/rosmsg` 解析。正式运行使用项目自己的 `Sa
 
 ## 已实现
 
-- 点云 `sensor_msgs/PointCloud2`：组织型 cloud、row_step 行填充、字段 offset/count、大小端、全部 8 种数值 datatype；丢弃 NaN/Infinity。支持 packed rgb/rgba、intensity 或相对高度着色。
-- `sensor_msgs/LaserScan`：XY 平面扫描，range_min / range_max、有限值过滤、强度着色。
+- 点云 `sensor_msgs/PointCloud2`：组织型 cloud、row_step 行填充、字段 offset/count、大小端、全部 8 种数值 datatype；丢弃 NaN/Infinity。支持选择 packed rgb/rgba、intensity、相对高度、固定颜色或自动着色。每层独立设置点大小、不透明度与采样上限。
+- `sensor_msgs/LaserScan`：XY 平面扫描，range_min / range_max、有限值过滤，显示颜色、点大小和不透明度可配置。
 - `tf2_msgs/TFMessage` / `tf/tfMessage`，`/tf_static`：父子链组合、逆变换、时间戳插值、静态变换、Time(0) 最新共同时间、固定坐标系切换。缺失 TF 时隐藏该数据并提示，不错误地显示在原点。
 - `nav_msgs/OccupancyGrid`：未知/空闲/占用灰度，分辨率与 origin 的平移/旋转。
 - `nav_msgs/Path`：最多 5000 姿态，逐姿态 frame/time 解析。
@@ -62,8 +62,8 @@ ROS schema 由 `@foxglove/rosmsg` 解析。正式运行使用项目自己的 `Sa
 ## 性能与资源边界
 
 - 渲染目标约 30 FPS（不保证设备实测），像素比最高 1.6，普通显示消息约 15 Hz 解码合并。
-- TF 与 Marker 动作不合并，避免丢静态分片或 DELETE 操作。点云每帧可选 2万 / 6万 / 12万点，默认6万；LaserScan 最多3万点。
-- 最大256个广告话题、同时32个订阅。每种受支持类型默认最多自动启用首个话题，TF 自动启用；只支持第一批最多约10类。
+- TF 与 Marker 动作不合并，避免丢静态分片或 DELETE 操作。点云每帧可选 2万 / 6万 / 12万点，默认6万；LaserScan 默认最多6万点。
+- 最大256个广告话题、同时32个订阅。首次连接仅 TF 自动启用，其余需要手动选择；后续恢复该服务器已保存的显式选择。
 - 原始消息最大32MiB，待解码总量64MiB，检查器最新消息缓存总量32MiB。图像解码一次仅1个任务，另保留1个最新待处理帧，重连/关闭后结果失效。
 - TF 最多512个 child、每个180样本 / 最近10秒，frame 名最大256字符，每个输入最多处理2048个变换。
 - Marker 最多1000个，累计约30万展开顶点，最多64个文本纹理。列表每条最多3000实例、点/线/三角输入最多2万点。地图最多4M单元，原始图像最多16M像素，压缩图像16MiB / 解码后8M像素。
@@ -102,3 +102,15 @@ ROS schema 由 `@foxglove/rosmsg` 解析。正式运行使用项目自己的 `Sa
 - `window.viewerDiagnostics()` 增加 `network`（连接阶段摘要）、`diagnosticLog`（有界脱敏时间线）与 `networkProbe`（最近一次原生检测结果）；不包含原始 ROS 消息正文，不增加任何发布或服务调用接口。
 
 原生桥接约定：`window.AndroidDiagnostics.requestNetworkDiagnostics(url, requestId)` 必须由 `#network-probe` 的真实用户点击同步调用，URL 必须与 `#url` 当前 trim 后文本完全一致。监听 `androidnetworkdiagnostics` 的 `CustomEvent.detail`，按 requestId 关联，忽略过期回复。`androiddiagnosticsready` 表示受限原生通道可用；应用进入后台取消未完成检测的界面状态。
+
+## v0.2.0 话题与图层设置
+
+详见 [显示设置说明](../docs/DISPLAY_SETTINGS_0.2.0.zh-CN.md)。图层抽屉提供话题名/类型搜索和分类过滤，右侧 ⚙ 打开独立设置。搜索不会订阅话题，设置不会改变订阅，取消勾选发送 unsubscribe。首次连接只自动订阅 TF，其他话题由用户选择；最多 32 个并发订阅，包括 TF。
+
+设置按规范化服务器 URL、话题名和 ROS 类型保存，不使用易变的 channel ID。最多 12 个服务器、每个 256 个话题，序列化内容最多 1,500,000 字符；超限逐出最久未选择的服务器，保留当前配置。URL 带查询参数/凭据/片段时不保存该服务器配置，避免落盘凭据。演示数据使用独立配置。设置损坏、版本未知、存储被禁或写满时保留安全默认/会话行为。
+
+字段缺失或无效的显式 RGB/强度模式退回固定颜色，并在图层状态提示。RGB 仅接收 count=1 的 INT32/UINT32/FLOAT32 packed 字段；packed float 采用位重解释，不把浮点值转为颜色。强度与高度按保留的有限样本范围逐帧归一化，恒定值显示中间色。部分非有限强度用备用色。高度为消息坐标系 Z，并非转换后固定坐标系高度。
+
+点大小为世界坐标米（0.01–0.5），随相机距离缩放；不透明度 0–1；点云预算 2万/6万/12万，底层输入验证范围 1000–120000。每帧替换释放 geometry/material。改变外观不重订阅；颜色模式/采样预算改变时重解码有界最新帧，保留其已解析 TF。若最新消息已被 32 MiB 缓存逐出，清除旧几何并明确等待新消息，不伪称旧图已应用设置。
+
+新增 `main.test.ts` 小型 DOM/event harness 测试真实主模块的搜索、筛选、订阅、配置、关闭/Back 和频道重用路径。它不实现浏览器布局，也不代表真机或 GPU 验证。

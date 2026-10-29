@@ -380,4 +380,60 @@ describe("read-only Foxglove ROS1 connection", () => {
     expect(connectionSummary(client.diagnostics)).toContain("网络诊断模式");
     expect(connectionSummary(client.diagnostics)).not.toContain("图层");
   });
+  it("honors explicit selection policies without subscribing every advertised stream", () => {
+    const { client, ws } = setup();
+    client.selectionForTopic = (t) => t.topic === "/fixture3";
+    ws.json({
+      op: "advertise",
+      channels: Array.from({ length: 100 }, (_, i) => channel(i + 1)),
+    });
+    expect(ws.sent).toEqual([
+      { op: "subscribe", subscriptions: [{ id: 0, channelId: 3 }] },
+    ]);
+    client.toggle(3, false);
+    ws.json({ op: "unadvertise", channelIds: [3] });
+    ws.json({
+      op: "advertise",
+      channels: [{ ...channel(200), topic: "/fixture3" }],
+    });
+    expect(client.topics.get(200)?.enabled).toBe(false);
+    expect(ws.sent.filter((m) => m.op === "subscribe")).toHaveLength(1);
+  });
+  it("restores explicit selections after reconnect and isolates the schema of reused topic names", () => {
+    const { client, ws, sockets } = setup();
+    client.selectionForTopic = () => false;
+    ws.json({ op: "advertise", channels: [channel()] });
+    client.toggle(1, true);
+    ws.close();
+    vi.advanceTimersByTime(1000);
+    sockets[1].open();
+    sockets[1].json({
+      op: "advertise",
+      channels: [{ ...channel(44), topic: "/fixture1" }],
+    });
+    expect(client.topics.get(44)?.enabled).toBe(true);
+    sockets[1].json({
+      op: "advertise",
+      channels: [{ ...channel(44, "custom/Other"), topic: "/fixture1" }],
+    });
+    expect(client.topics.get(44)?.enabled).toBe(false);
+    expect(sockets[1].sent.at(-1).op).toBe("unsubscribe");
+  });
+  it("enforces the subscription cap for restored selections and clears a recovered cap error", () => {
+    const { client, ws } = setup();
+    client.selectionForTopic = () => true;
+    ws.json({
+      op: "advertise",
+      channels: Array.from({ length: 40 }, (_, i) => channel(i + 1)),
+    });
+    expect(client.diagnostics.subscribed).toBe(32);
+    expect(client.topics.get(33)?.error).toContain("32");
+    client.toggle(1, false);
+    client.toggle(33, true);
+    expect(client.diagnostics.subscribed).toBe(32);
+    expect(client.topics.get(33)?.error).toBeUndefined();
+    expect(
+      ws.sent.every((m) => ["subscribe", "unsubscribe"].includes(m.op)),
+    ).toBe(true);
+  });
 });

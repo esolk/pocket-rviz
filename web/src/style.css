@@ -184,7 +184,9 @@ input:not([type="checkbox"]):focus {
   border-radius: 16px;
   box-shadow: 0 16px 50px #0003;
   z-index: 3;
-  transform: translateX(-325px);
+  transform: translateX(
+    calc(-100% - max(10px, env(safe-area-inset-left)) - 12px)
+  );
   transition: transform 0.2s ease;
   backdrop-filter: blur(16px);
 }
@@ -1111,4 +1113,164 @@ dialog .warning {
   font-size: 12px;
   margin-bottom: 8px;
   color: #a5bdcd;
+}
+
+/* Topic discovery and per-layer settings: keep the list usable on a short screen. */
+.drawer {
+  width: min(330px, calc(100vw - 20px));
+}
+#topic-list {
+  min-height: 0;
+}
+.scene-settings {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+}
+.scene-settings summary {
+  min-height: 44px;
+  padding: 12px 16px;
+  cursor: pointer;
+  color: #a4bac9;
+  font-size: 12px;
+}
+.topic-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 106px;
+  gap: 6px;
+  padding: 2px 12px 10px;
+  flex-shrink: 0;
+}
+.topic-search input,
+.topic-search select {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px;
+  font-size: 12px;
+}
+.topic-search select {
+  padding-right: 2px;
+}
+.topic-row {
+  gap: 9px;
+  padding-left: 14px;
+  padding-right: 8px;
+}
+.topic-row input[type="checkbox"] {
+  width: 28px;
+  height: 28px;
+}
+.topic-row .topic-label {
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.inspect-button {
+  font-size: 22px;
+}
+#layer-dialog {
+  width: min(680px, calc(100vw - 24px));
+  padding: 16px 20px;
+  overscroll-behavior: contain;
+}
+#layer-dialog .dialog-heading {
+  position: sticky;
+  top: -16px;
+  background: #122333;
+  padding: 6px 0;
+  z-index: 1;
+}
+#layer-dialog .dialog-heading > div {
+  min-width: 0;
+}
+#layer-dialog .dialog-heading small {
+  color: var(--mint);
+  font-size: 11px;
+}
+#layer-dialog h2 {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+#layer-dialog .dialog-heading button {
+  flex-shrink: 0;
+}
+.layer-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+}
+.layer-controls label {
+  margin: 0;
+  font-size: 12px;
+}
+.layer-controls input,
+.layer-controls select {
+  margin-top: 8px;
+  min-height: 48px;
+}
+.layer-controls input[type="color"] {
+  padding: 5px;
+  cursor: pointer;
+}
+.layer-controls input[type="range"] {
+  padding: 0;
+  accent-color: var(--mint);
+  cursor: pointer;
+}
+#layer-opacity-value {
+  float: right;
+  color: var(--mint);
+}
+#layer-note,
+#layer-feedback {
+  font-size: 12px;
+}
+#layer-feedback {
+  color: var(--mint);
+  min-height: 20px;
+}
+#layer-dialog .dialog-actions {
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+#layer-dialog .dialog-actions button {
+  min-height: 48px;
+  padding: 9px 15px;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .drawer {
+    width: 330px;
+  }
+  .drawer-heading {
+    flex-shrink: 0;
+  }
+  .drawer .topic-row {
+    min-height: 70px;
+  }
+  .drawer-footer {
+    flex-shrink: 0;
+  }
+  #layer-dialog {
+    max-height: calc(100dvh - 16px);
+  }
+}
+@media (max-width: 500px) {
+  #layer-dialog {
+    padding: 12px;
+  }
+  .layer-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+#layer-dialog h2 {
+  max-height: 2.6em;
+  overflow: hidden;
+}
+#layer-type {
+  overflow-wrap: anywhere;
+}
+.layer-controls input,
+.layer-controls select {
+  min-width: 0;
 }

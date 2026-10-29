@@ -1,6 +1,6 @@
 {
   "name": "ros-tablet-viewer",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -23,5 +23,6 @@
     "typescript": "^5.9.3",
     "vite": "^7.1.9",
     "vitest": "^3.2.4"
-  }
+  },
+  "license": "MIT"
 }

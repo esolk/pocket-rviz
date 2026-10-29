@@ -10,7 +10,7 @@ LINT="$SDK/cmdline-tools/latest/bin/lint"
 [[ -d "$ROOT/android/build/classes" ]] || { echo "Run scripts/android-build.sh before lint." >&2; exit 1; }
 "$LINT" --exitcode --sdk-home "$SDK" --compile-sdk-version 35 \
   --sources "$ROOT/android/app/src/main/java" --resources "$ROOT/android/app/src/main/res" \
-  --classpath "$ROOT/android/build/classes" \
+  --classpath "$ROOT/android/build/classes:$ROOT/.toolchains/deps/jsch-0.2.26-android.jar:$ROOT/.toolchains/deps/bcprov-1.80-android.jar" \
   --check NewApi,InlinedApi,MissingPermission \
   --text "$ROOT/android/build/android-api-lint.txt" "$ROOT/android/app/src/main"
 cat "$ROOT/android/build/android-api-lint.txt"

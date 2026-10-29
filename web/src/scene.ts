@@ -8,6 +8,7 @@ import {
   decodeLaserScan,
 } from "./data";
 import type { Topic } from "./client";
+import { defaultLayerSettings, normalizeLayerSettings, type LayerSettings } from "./display-settings";
 export type Layer = {
   id: number;
   topic: string;
@@ -22,6 +23,8 @@ export type Layer = {
   markers: Map<string, MarkerEntry>;
   history: THREE.Vector3[];
   transform?: THREE.Matrix4;
+  settings: LayerSettings;
+  warning?: string;
 };
 type MarkerEntry = {
   object: THREE.Object3D;
@@ -105,6 +108,7 @@ export class ViewerScene {
   private markerVertices = 0;
   private markerTexts = 0;
   private axisObjects = new Map<string, THREE.AxesHelper>();
+  private originalAppearance = new WeakMap<THREE.Material, { opacity: number; transparent: boolean; depthWrite: boolean }>();
   private stopped = false;
   constructor(public container: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({
@@ -181,6 +185,11 @@ export class ViewerScene {
   }
   addTopic(t: Topic) {
     let l = this.layers.get(t.id);
+    // Bridge channel IDs may be reused after an unadvertise/reconnect.
+    if (l && (l.topic !== t.topic || l.type !== t.schemaName)) {
+      this.removeTopic(t.id);
+      l = undefined;
+    }
     if (!l) {
       const root = new THREE.Group();
       this.scene.add(root);
@@ -197,11 +206,63 @@ export class ViewerScene {
         latest: undefined,
         markers: new Map(),
         history: [],
+        settings: defaultLayerSettings(t.schemaName),
       };
       this.layers.set(t.id, l);
     }
     l.enabled = t.enabled;
     return l;
+  }
+  /** Appearance changes are immediate; callers may replay bounded cached cloud/scan
+   * messages with ingest(..., true) when changing color mode or point budget. */
+  configureTopic(t: Topic, settings: LayerSettings) {
+    const l = this.addTopic(t);
+    l.settings = normalizeLayerSettings(settings, l.type);
+    this.applyAppearance(l);
+    return l;
+  }
+  private applyAppearance(l: Layer, root: THREE.Object3D = l.root) {
+    const markerLayer = l.type.startsWith("visualization_msgs/");
+    const pointsLayer = l.type === "sensor_msgs/PointCloud2" || l.type === "sensor_msgs/LaserScan";
+    const colorLayer = l.type === "nav_msgs/Path" || l.type === "nav_msgs/Odometry" || l.type === "geometry_msgs/PoseStamped";
+    if (!markerLayer && !pointsLayer && !colorLayer && l.type !== "nav_msgs/OccupancyGrid") return;
+    root.traverse((object) => {
+      const drawable = object as THREE.Mesh;
+      const materials = drawable.material ? (Array.isArray(drawable.material) ? drawable.material : [drawable.material]) : [];
+      for (const material of materials) {
+        let original = this.originalAppearance.get(material);
+        if (!original) {
+          original = { opacity: material.opacity, transparent: material.transparent, depthWrite: material.depthWrite };
+          this.originalAppearance.set(material, original);
+        }
+        material.opacity = l.settings.opacity * (markerLayer ? original.opacity : 1);
+        const transparent = (markerLayer && original.transparent) || material.opacity < 1;
+        if (material.transparent !== transparent) material.needsUpdate = true;
+        material.transparent = transparent;
+        material.depthWrite = original.depthWrite && material.opacity === 1;
+        const colored = material as THREE.PointsMaterial;
+        if (pointsLayer) {
+          colored.size = l.settings.pointSize;
+          const solid = l.type === "sensor_msgs/LaserScan" || l.settings.colorMode === "solid" || drawable.geometry?.userData.colorMode === "solid";
+          const vertexColors = !solid && !!drawable.geometry?.getAttribute("color");
+          if (colored.vertexColors !== vertexColors) colored.needsUpdate = true;
+          colored.vertexColors = vertexColors;
+          colored.color.set(vertexColors ? 0xffffff : l.settings.color);
+          if (vertexColors && drawable.geometry.userData.solidIndices) {
+            // Retain only bounded vertex indices for invalid scalar samples, so
+            // their fallback color can change without caching a raw ROS message.
+            const colors = drawable.geometry.getAttribute("color");
+            const fallback = new THREE.Color(l.settings.color);
+            for (const index of drawable.geometry.userData.solidIndices as Uint32Array)
+              colors.setXYZ(index, fallback.r, fallback.g, fallback.b);
+            colors.needsUpdate = true;
+          }
+        } else if (colorLayer && !colored.vertexColors) {
+          // Preserve the red/green/blue axes beside a pose arrow.
+          colored.color?.set(l.settings.color);
+        }
+      }
+    });
   }
   removeTopic(id: number) {
     const l = this.layers.get(id);
@@ -229,7 +290,7 @@ export class ViewerScene {
     }
     l.markers.clear();
   }
-  ingest(t: Topic, m: any) {
+  ingest(t: Topic, m: any, preserveTransform = false) {
     if (
       t.schemaName === "tf2_msgs/TFMessage" ||
       t.schemaName === "tf/tfMessage"
@@ -242,18 +303,23 @@ export class ViewerScene {
     }
     const l = this.addTopic(t);
     l.latest = l.type === "nav_msgs/Path" ? m : undefined;
-    l.frame = cleanFrame(m.header?.frame_id) || this.fixedFrame;
-    l.stamp = stampNs(m.header?.stamp);
-    l.transform = undefined;
+    const frame = cleanFrame(m.header?.frame_id) || this.fixedFrame;
+    const stamp = stampNs(m.header?.stamp);
+    if (!preserveTransform || frame !== l.frame || stamp !== l.stamp) l.transform = undefined;
+    l.frame = frame;
+    l.stamp = stamp;
+    l.warning = undefined;
     try {
       switch (l.type) {
         case "sensor_msgs/PointCloud2":
         case "sensor_msgs/LaserScan": {
           const decoded =
             l.type === "sensor_msgs/PointCloud2"
-              ? decodePointCloud(m, this.maxPoints)
-              : decodeLaserScan(m, 30000);
+              ? decodePointCloud(m, l.settings.pointLimit, l.settings)
+              : decodeLaserScan(m, l.settings.pointLimit);
           const geo = new THREE.BufferGeometry();
+          geo.userData.colorMode = decoded.colorMode;
+          geo.userData.solidIndices = decoded.solidIndices;
           geo.setAttribute(
             "position",
             new THREE.BufferAttribute(decoded.positions, 3),
@@ -276,7 +342,8 @@ export class ViewerScene {
             ),
           );
           l.count = decoded.count;
-          l.status = `${l.count.toLocaleString()} 点`;
+          l.warning = decoded.warning;
+          l.status = `${l.count.toLocaleString()} 点${l.warning ? ` · ⚠ ${l.warning}` : ""}`;
           break;
         }
         case "nav_msgs/OccupancyGrid":
@@ -314,6 +381,7 @@ export class ViewerScene {
   private replace(l: Layer, obj: THREE.Object3D) {
     this.clearLayer(l);
     l.root.add(obj);
+    this.applyAppearance(l, obj);
   }
   private map(l: Layer, m: any) {
     const w = m.info?.width,
@@ -580,6 +648,16 @@ export class ViewerScene {
       return;
     }
     if (!usedMat) mat.dispose();
+    if (m.type === 0) {
+      // ArrowHelper constructs its own materials, outside material(m.color).
+      group.traverse((object) => {
+        const material = (object as THREE.Mesh).material;
+        for (const mat of material ? (Array.isArray(material) ? material : [material]) : []) {
+          mat.opacity = m.color?.a ?? 1;
+          mat.transparent = mat.opacity < 1;
+        }
+      });
+    }
     let cost = 0;
     group.traverse((object) => {
       const mesh = object as THREE.Mesh;
@@ -599,6 +677,7 @@ export class ViewerScene {
     }
     const lifetime = Number(stampNs(m.lifetime)) / 1e6;
     l.root.add(group);
+    this.applyAppearance(l, group);
     l.markers.set(key, {
       object: group,
       frame: cleanFrame(m.header?.frame_id) || this.fixedFrame,
@@ -667,8 +746,8 @@ export class ViewerScene {
         l.root.matrixAutoUpdate = false;
         l.root.matrix.copy(tf);
         if (l.status.startsWith("缺少 TF"))
-          l.status = `${l.count.toLocaleString()} · TF 正常`;
-      } else l.status = `缺少 TF: ${l.frame} → ${this.fixedFrame}`;
+          l.status = `${l.count.toLocaleString()} · TF 正常${l.warning ? ` · ⚠ ${l.warning}` : ""}`;
+      } else l.status = `缺少 TF: ${l.frame} → ${this.fixedFrame}${l.warning ? ` · ⚠ ${l.warning}` : ""}`;
     }
     this.tfVisual.visible = this.showTf;
     if (this.showTf) {

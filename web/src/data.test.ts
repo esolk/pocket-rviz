@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Matrix4, Vector3 } from 'three';
+import { Color, Matrix4, Vector3 } from 'three';
 import { bytes, cleanFrame, decodeImage, decodeLaserScan, decodePointCloud, stampNs, TfTree } from './data';
 
 const transform = (parent: string, child: string, time: number, translation = [0, 0, 0], rotation = [0, 0, 0, 1]) => ({
@@ -328,6 +328,102 @@ describe('PointCloud2 decoding', () => {
     expect(() => decodePointCloud({ ...input, fields: [field('x', 0), field('y', 4), field('z', 8, 7, 2)] })).toThrow('field');
     expect(() => decodePointCloud({ ...input, fields: [field('x', 0)] })).toThrow('requires');
     expect(() => decodePointCloud({ ...input, width: -1 })).toThrow('width');
+  });
+});
+
+describe('PointCloud2 display settings', () => {
+  function coloredCloud(values = [10, 20, 30]) {
+    const data = new Uint8Array(values.length * 24), view = new DataView(data.buffer);
+    values.forEach((intensity, i) => {
+      view.setFloat32(i * 24, i, true);
+      view.setFloat32(i * 24 + 8, i * 5, true);
+      view.setFloat64(i * 24 + 12, intensity, true);
+      view.setUint32(i * 24 + 20, 0x804020, true);
+    });
+    return { width: values.length, height: 1, point_step: 24, row_step: data.length, data,
+      fields: [field('x', 0), field('y', 4), field('z', 8), field('intensity', 12, 8), field('rgb', 20, 6)] };
+  }
+  it('selects explicit intensity and height even when packed RGB is present', () => {
+    const input = coloredCloud();
+    const auto = decodePointCloud(input);
+    expect(auto.colorMode).toBe('rgb');
+    closeVector([...auto.colors!].slice(0, 3), [128 / 255, 64 / 255, 32 / 255]);
+    const intensity = decodePointCloud(input, 100, { colorMode: 'intensity' });
+    expect(intensity.colorMode).toBe('intensity');
+    closeVector([...intensity.colors!], [0.2, 0.2, 0.2, 0.6, 0.6, 0.6, 1, 1, 1]);
+    const height = decodePointCloud(input, 100, { colorMode: 'height' });
+    expect(height.colorMode).toBe('height');
+    expect([...height.colors!]).toEqual([0, 0, 1, 0.5, 1, 0.5, 1, 0, 0]);
+  });
+  it('uses the configured solid color independent of message color fields', () => {
+    const result = decodePointCloud(coloredCloud(), 100, { colorMode: 'solid', color: '#80ff40' });
+    expect(result.colorMode).toBe('solid');
+    const expected = new Color('#80ff40').toArray();
+    closeVector([...result.colors!], [...expected, ...expected, ...expected]);
+    expect(result.warning).toBeUndefined();
+  });
+  it.each([5, 6, 7])('accepts one packed 32-bit value of datatype %i in either byte order', (datatype) => {
+    for (const little of [true, false]) {
+      const input = coloredCloud([0]);
+      new DataView(input.data.buffer).setUint32(20, 0xffff8040, little);
+      input.fields[input.fields.length - 1].datatype = datatype;
+      const result = decodePointCloud({ ...input, is_bigendian: !little }, 100, { colorMode: 'rgb' });
+      expect(result.colorMode).toBe('rgb');
+      closeVector([...result.colors!], [1, 128 / 255, 64 / 255]);
+    }
+  });
+  it.each([
+    field('rgb', 20, 2), field('rgb', 12, 8), field('rgb', 12, 6, 2),
+    field('rgb', 23, 6), field('rgb', -1, 6), field('rgb', 20, 9),
+    field('rgb', 20, 6, 0), field('rgb', 20, 6, 1.5),
+  ])('uses a visible solid fallback for invalid packed metadata %j', (invalid) => {
+    const input = coloredCloud([1]);
+    input.fields[input.fields.length - 1] = invalid;
+    const result = decodePointCloud(input, 100, { colorMode: 'rgb', color: '#ff0000' });
+    expect(result.count).toBe(1);
+    expect(result.colorMode).toBe('solid');
+    expect([...result.colors!]).toEqual([1, 0, 0]);
+    expect(result.warning).toContain('RGB');
+  });
+  it('accepts valid rgba when a competing rgb field is malformed', () => {
+    const input = coloredCloud([1]);
+    input.fields.push(field('rgba', 20, 6));
+    input.fields[input.fields.length - 2] = field('rgb', 12, 6, 2);
+    expect(decodePointCloud(input, 100, { colorMode: 'rgb' }).colorMode).toBe('rgb');
+  });
+  it.each(['rgb', 'intensity'] as const)('falls back to solid with a warning when explicit %s is absent', (colorMode) => {
+    const result = decodePointCloud(cloud([[0, 0, 0]]), 10, { colorMode, color: '#0000ff' });
+    expect(result.colorMode).toBe('solid');
+    expect([...result.colors!]).toEqual([0, 0, 1]);
+    expect(result.warning).toContain('使用纯色');
+  });
+  it('falls back for invalid intensity field extents and array counts', () => {
+    for (const invalid of [field('intensity', 23, 8), field('intensity', 12, 7, 2)]) {
+      const input = coloredCloud([1]);
+      input.fields[3] = invalid;
+      const result = decodePointCloud(input, 100, { colorMode: 'intensity', color: '#00ff00' });
+      expect(result.colorMode).toBe('solid');
+      expect([...result.colors!]).toEqual([0, 1, 0]);
+      expect(result.warning).toContain('intensity');
+    }
+  });
+  it('normalizes finite intensity samples and gives nonfinite samples a finite solid fallback', () => {
+    const result = decodePointCloud(coloredCloud([-1e308, NaN, 1e308]), 100, { colorMode: 'intensity', color: '#00ff00' });
+    closeVector([...result.colors!], [0.2, 0.2, 0.2, 0, 1, 0, 1, 1, 1]);
+    expect(result.warning).toContain('非有限值');
+    expect([...result.colors!, ...result.positions].every(Number.isFinite)).toBe(true);
+    const missing = decodePointCloud(coloredCloud([NaN, Infinity, -Infinity]), 100, { colorMode: 'intensity', color: '#00ff00' });
+    expect(missing.colorMode).toBe('solid');
+    expect([...missing.colors!]).toEqual([0, 1, 0, 0, 1, 0, 0, 1, 0]);
+    expect(missing.warning).toContain('没有有限值');
+  });
+  it('normalizes each frame independently and keeps a constant scalar range finite', () => {
+    for (const values of [[0, 50, 100], [1000, 1050, 1100]]) {
+      const result = decodePointCloud(coloredCloud(values), 100, { colorMode: 'intensity' });
+      closeVector([...result.colors!], [0.2, 0.2, 0.2, 0.6, 0.6, 0.6, 1, 1, 1]);
+    }
+    const result = decodePointCloud(coloredCloud([7, 7, 7]), 100, { colorMode: 'intensity' });
+    expect([...result.colors!].every(v => Math.abs(v - 0.6) < 1e-6)).toBe(true);
   });
 });
 

@@ -11,3 +11,7 @@ if command -v javac >/dev/null; then JAVAC=(javac); else JAVAC=(java com.sun.too
   "$ROOT/android/tests/DiagnosticUnitTest.java"
 java -cp "$OUT" dev.dot.rosviewer.DiagnosticUnitTest
 node "$ROOT/android/tests/bridge-test.cjs"
+"${JAVAC[@]}" -encoding UTF-8 -d "$OUT" \
+  "$ROOT/android/app/src/main/java/dev/dot/rosviewer/InstallerPolicy.java" \
+  "$ROOT/android/tests/InstallerPolicyTest.java"
+java -cp "$OUT" dev.dot.rosviewer.InstallerPolicyTest

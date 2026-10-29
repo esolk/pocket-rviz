@@ -3,7 +3,7 @@
 ROS Tablet Viewer is a small offline WebView host for the web application in `../web`.
 
 - Application ID: `dev.dot.rosviewer`
-- Version: `0.1.1` (version code 2)
+- Version: `0.3.0` (version code 4)
 - Minimum: Android 7.0 / API 24; compile/target API 35
 - Requires an updated Android System WebView with WebGL 2 and a suitable GPU
 - Layout target: 7-inch phone in landscape; portrait and larger tablet layouts remain supported
@@ -12,7 +12,7 @@ ROS Tablet Viewer is a small offline WebView host for the web application in `..
 
 ## Build
 
-Requirements: JDK 17 or 21, Node.js 22.12+ / npm, Python 3, Android SDK platform 35 and build-tools 35.0.0. The build is intentionally Gradle-free: it invokes Google's normal `aapt2`, `d8`, `zipalign`, and `apksigner` tools, with Java's standard compiler. No third-party Android libraries are downloaded.
+Requirements: JDK 17 or 21, Node.js 22.12+ / npm, Python 3, Android SDK platform 35 and build-tools 35.0.0. The build is intentionally Gradle-free: it invokes Google's normal `aapt2`, `d8`, `zipalign`, and `apksigner` tools, with Java's standard compiler. The build downloads checksum-pinned JSch and Bouncy Castle libraries from Maven Central; their original licenses are bundled in assets/licenses.
 
 If needed, install the official SDK. The supplied Linux x86_64 setup script downloads a checksum-pinned official command-line tools archive and prompts for an explicit license opt-in. Review the [Android SDK license](https://developer.android.com/studio/terms) before agreeing:
 
@@ -25,11 +25,11 @@ cd ..
 bash scripts/android-build.sh
 ```
 
-For an existing SDK, set `ANDROID_SDK_ROOT` or `ANDROID_HOME`. Build output is `android/build/ros-tablet-viewer-0.1.1-debug.apk`; its checksum, manifest/signature reports, and `build-metadata.json` are adjacent. The metadata lists SHA-256 hashes for each bundled web file so the packaged bundle can be compared with browser QA. Web assets are copied from `web/dist`, or the directory specified by `WEB_DIST`. The build never edits web sources. ZIP entry timestamps are normalized; repeating the build with identical web files, SDK tools, Java compiler and debug key should produce identical APK bytes.
+For an existing SDK, set `ANDROID_SDK_ROOT` or `ANDROID_HOME`. Build output is `android/build/ros-tablet-viewer-0.3.0-debug.apk`; its checksum, manifest/signature reports, and `build-metadata.json` are adjacent. The metadata lists SHA-256 hashes for each bundled web file so the packaged bundle can be compared with browser QA. Web assets are copied from `web/dist`, or the directory specified by `WEB_DIST`. The build never edits web sources. ZIP entry timestamps are normalized; repeating the build with identical web files, SDK tools, Java compiler and debug key should produce identical APK bytes.
 
 The build creates an ordinary local debug keystore at `.local/android-debug.keystore` if absent. This is not a production signing identity; do not use this build for Play Store publication. The key is deliberately excluded from the source delivery. Rebuilding with a different key may require uninstalling the earlier APK (which removes its saved preferences) before installation. Keep the same local key for your own future test updates.
 
-To install yourself, transfer the APK to the tablet and open it, or use `adb install -r android/build/ros-tablet-viewer-0.1.1-debug.apk` after enabling authorized USB debugging. No device is installed or modified by the build script.
+To install yourself, transfer the APK to the tablet and open it, or use `adb install -r android/build/ros-tablet-viewer-0.3.0-debug.apk` after enabling authorized USB debugging. No device is installed or modified by the build script. `adb install -r` only works when the installed APK has the same signing certificate. The separately delivered October 2026 v0.2.0 test build uses a new debug certificate because the prior private key was unavailable: it cannot overwrite the previous v0.1.1 build. Uninstalling that previous build first removes its local preferences; record any connection address you need before doing so.
 
 ## Network and WebView security
 
@@ -40,6 +40,10 @@ The web client uses ROS1 Foxglove bridge (`foxglove.websocket.v1`), usually at `
 Plain `ws://` has no encryption or server authentication. Use it only on a trusted isolated robot LAN. For any untrusted network, use `wss://` with a valid system-trusted certificate and a secured Foxglove bridge endpoint or trusted private network. TLS verification is never bypassed; self-signed or otherwise invalid certificates fail. No certificate-installation or security-setting changes are made by this app. The app does not make an unsecured robot bridge server safe or private.
 
 The only declared permission is Internet access. There are no background services, analytics, CDNs, location/storage/camera/microphone permissions or robot-control native interfaces. Web content is bundled and works in demo mode offline.
+
+## Optional SSH bridge installer (v0.3.0)
+
+The native installer is a separate non-exported Activity, not a WebView command API. It requires explicit SSH host-key confirmation and one-time authentication. See [the full installation workflow](../docs/BRIDGE_INSTALLER.zh-CN.md) for phone-side package downloads, dependencies, sudo, startup and interruption limits. Existing viewer diagnostics retain their narrower privileges.
 
 ## User-triggered network diagnostics (v0.1.1)
 
@@ -67,3 +71,12 @@ Android Back dispatches a cancelable `androidback` event to the page. The page c
 `android-build.sh` checks APK signature validity, ZIP alignment, manifest package/version/SDK data, ZIP integrity, DEX presence, and byte-for-byte inclusion of all built web files and the native bridge bootstrap. If the original v0.1.0 APK is still in the build folder, it also checks that the signing certificate is unchanged. Run `bash scripts/android-test.sh` for pure-JVM URL/error classification and sandboxed JavaScript bridge authorization checks; these tests make no network requests. With the command-line tools installed, `bash scripts/android-lint.sh` checks Android API compatibility and missing permissions. A successful static build does not establish phone rendering or live-robot correctness. Test on the target phone: offline demo, WebGL availability, portrait/landscape, keyboard input, Back, home/resume, LAN socket disconnect/reconnect, and an appropriately secured TLS endpoint.
 
 Official references: [local WebView content](https://developer.android.com/develop/ui/views/layout/webapps/load-local-content), [network security configuration](https://developer.android.com/privacy-and-security/security-config), [APK signing tool](https://developer.android.com/tools/apksigner).
+
+## Added native dependency notices
+
+- JSch 0.2.26 (mwiede): BSD-style, bundled original LICENSE plus included JZlib/jBCrypt notices.
+- Bouncy Castle bcprov 1.80: MIT-style upstream license, for modern SSH key algorithms on older Android.
+- Exact Maven Central artifacts are SHA-256 pinned by `scripts/android-ssh-dependency.sh`; binaries are build outputs, not committed.
+- Project MIT text is included at `assets/web/LICENSE.txt`; dependency texts at `assets/licenses/` and `assets/web/THIRD_PARTY_NOTICES.txt` retain their own terms.
+
+Run `bash scripts/bridge-installer-test.sh` for pure JVM manifest/policy and hermetic remote-script tests. These do not access a real SSH/ROS host or emulate Android UI.

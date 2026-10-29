@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# A reproducible, dependency-free Android build using Google's SDK tools directly.
+# A reproducible Android build using Google's SDK tools directly.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$ROOT/.toolchains/android-sdk}}"
@@ -27,6 +27,9 @@ done
 [[ -f "$WEB_DIST/index.html" ]] || { echo "Build the web app first: cd web && npm ci && npm run build" >&2; exit 1; }
 command -v java >/dev/null
 command -v python3 >/dev/null
+bash "$ROOT/scripts/android-ssh-dependency.sh"
+SSH_JAR="$ROOT/.toolchains/deps/jsch-0.2.26-android.jar"
+BC_JAR="$ROOT/.toolchains/deps/bcprov-1.80-android.jar"
 
 # Full JDKs have javac; some containers retain its standard module but omit its wrapper.
 if command -v javac >/dev/null; then JAVAC=(javac); else JAVAC=(java com.sun.tools.javac.Main); fi
@@ -50,10 +53,10 @@ fi
   --java "$OUT/generated" --min-sdk-version 24 --target-sdk-version 35 \
   -A "$OUT/assets" "$OUT/resources.zip"
 find "$ROOT/android/app/src/main/java" "$OUT/generated" -name '*.java' | sort > "$OUT/sources.list"
-"${JAVAC[@]}" -encoding UTF-8 -source 8 -target 8 -bootclasspath "$ANDROID_JAR" \
-  -d "$OUT/classes" @"$OUT/sources.list"
+"${JAVAC[@]}" -encoding UTF-8 -source 8 -target 8 \
+  -classpath "$ANDROID_JAR:$SSH_JAR:$BC_JAR" -d "$OUT/classes" @"$OUT/sources.list"
 mapfile -t CLASSES < <(find "$OUT/classes" -name '*.class' | sort)
-"$BT/d8" --min-api 24 --lib "$ANDROID_JAR" --output "$OUT/dex" "${CLASSES[@]}"
+"$BT/d8" --min-api 24 --lib "$ANDROID_JAR" --output "$OUT/dex" "${CLASSES[@]}" "$SSH_JAR" "$BC_JAR"
 cp "$OUT/resources.ap_" "$OUT/unsigned.apk"
 python3 - "$OUT" <<'PY'
 from pathlib import Path

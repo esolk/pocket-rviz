@@ -1,4 +1,4 @@
-# pocket-rviz：掌上 ROS1 可视化原型 v0.1.1
+# pocket-rviz：掌上 ROS1 可视化原型 v0.2.0
 
 目标设备：7 英寸手机横屏。重新实现 ROS1 常用可视化，不是原版 RViz 的 Android 移植版，不兼容桌面 C++ 插件。
 
@@ -10,6 +10,15 @@
 4. 在手机填写桥接地址，例如 `ws://192.0.2.1:8765`；这是文档占位地址，请换成受控局域网中的真实机器人地址，选择真实存在的固定坐标系和话题。默认只读，不发送车辆控制指令。
 
 Android 最低 API 24，但三维显示还要求设备 GPU 与 Android System WebView 支持 WebGL 2。最低系统版本并不保证所有旧设备可用。没有可用 WebGL 2 时会显示兼容性说明。
+
+## v0.2.0：话题选择与显示配置
+
+- 搜索话题名或消息类型，按已选、可视化、点云/扫描、图像筛选；勾选才订阅，取消即停止。首次连接只自动启用 TF。
+- 每个话题右侧 ⚙ 打开独立设置。PointCloud2 可选择自动、RGB/RGBA、强度、高度、固定颜色，以及点大小、不透明度和点数上限。
+- 扫描/路径/姿态支持颜色、不透明度；地图支持不透明度；Marker 支持整体不透明度乘数；图像可选择当前显示的流。
+- 设置及选择按服务器、话题、类型在本机保存。搜索和显示设置不会额外订阅数据。
+
+操作与限制见 [显示设置说明](docs/DISPLAY_SETTINGS_0.2.0.zh-CN.md)。
 
 ## v0.1.1 更新
 
@@ -52,4 +61,8 @@ SDK、node_modules、调试签名私钥和中间构建目录不随源码交付�
 
 ## 许可证与第三方依赖
 
-项目自身尚未选定开源许可证；公开可见不等于授予重新使用、修改或分发许可。第三方依赖各自的许可证不受影响，完整声明见 [THIRD_PARTY_NOTICES.txt](web/public/THIRD_PARTY_NOTICES.txt)。
+项目自有代码采用 [MIT 许可证](LICENSE)。第三方依赖各自的许可证不受影响，完整声明见 [THIRD_PARTY_NOTICES.txt](web/public/THIRD_PARTY_NOTICES.txt)。
+
+## 手机代装 bridge
+
+新增原生 SSH 安装向导：一次性密码或私钥登录 → 检测系统/架构和 bridge → 手机下载主包与缺失依赖 → SFTP 传输 → sudo 安装 → 确认启动只读 bridge。支持 Ubuntu 20.04 / Noetic 的 amd64、arm64。见[完整流程、凭据处理与限制](docs/BRIDGE_INSTALLER.zh-CN.md)。

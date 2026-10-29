@@ -1,5 +1,6 @@
 import { FoxgloveClient, type Channel } from "@foxglove/ws-protocol";
 import { parse } from "@foxglove/rosmsg";
+import { topicKey } from "./display-settings";
 import { SafeMessageReader as MessageReader } from "./reader";
 import {
   DIAGNOSTIC_LIMIT,
@@ -47,6 +48,8 @@ export class RosConnection {
   state = "未连接";
   bytesReceived = 0;
   autoSubscribe = true;
+  /** Optional app policy. No preference means the existing auto-selection policy. */
+  selectionForTopic?: (topic: Topic) => boolean | undefined;
   private client?: FoxgloveClient;
   private socket?: WebSocket;
   private bySubscription = new Map<number, Topic>();
@@ -351,7 +354,7 @@ export class RosConnection {
         );
       }
       for (const c of channels) {
-        if (this.topics.size >= 256) {
+        if (this.topics.size >= 256 && !this.topics.has(c.id)) {
           this.onError("频道上限 256；请在 bridge 过滤不需要的 topic");
           break;
         }
@@ -383,7 +386,10 @@ export class RosConnection {
             (!this.autoKinds.has(c.schemaName) &&
               topic.supported &&
               this.autoKinds.size < 10));
-        const enabled = this.remembered.get(c.topic) ?? auto;
+        const enabled =
+          this.remembered.get(topicKey(c.topic, c.schemaName)) ??
+          this.selectionForTopic?.(topic) ??
+          auto;
         if (enabled && topic.reader) {
           this.autoKinds.add(c.schemaName);
           this.enable(topic);
@@ -466,7 +472,11 @@ export class RosConnection {
   toggle(id: number, enabled: boolean) {
     const t = this.topics.get(id);
     if (!t) return;
-    this.remembered.set(t.topic, enabled);
+    const key = topicKey(t.topic, t.schemaName);
+    this.remembered.delete(key);
+    this.remembered.set(key, enabled);
+    while (this.remembered.size > 256)
+      this.remembered.delete(this.remembered.keys().next().value!);
     enabled ? this.enable(t) : this.disable(t);
     this.updateCounts();
     this.addDiagnostic(
@@ -482,6 +492,7 @@ export class RosConnection {
       t.error = "最多同时订阅 32 个 topic";
       return;
     }
+    if (t.error === "最多同时订阅 32 个 topic") t.error = undefined;
     t.subscription = this.client.subscribe(t.id);
     t.enabled = true;
     this.bySubscription.set(t.subscription, t);
